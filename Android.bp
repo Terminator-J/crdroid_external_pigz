@@ -1,0 +1,60 @@
+pigz_src_files = [
+    "pigz.c",
+    "try.c",
+    "yarn.c",
+]
+
+zopfli_src_files = [
+    "zopfli/src/zopfli/blocksplitter.c",
+    "zopfli/src/zopfli/cache.c",
+    "zopfli/src/zopfli/deflate.c",
+    "zopfli/src/zopfli/tree.c",
+    "zopfli/src/zopfli/lz77.c",
+    "zopfli/src/zopfli/hash.c",
+    "zopfli/src/zopfli/util.c",
+    "zopfli/src/zopfli/squeeze.c",
+    "zopfli/src/zopfli/katajainen.c",
+]
+
+pigz_cflags = [
+    "-Wno-unused-variable",
+    "-Wno-unused-parameter",
+]
+
+cc_library_static {
+    name: "libzopfli_static",
+    srcs: zopfli_src_files,
+    host_supported: true,
+    device_supported: true,
+    include_build_directory: true,
+    local_include_dirs: ["zopfli/src/zopfli"],
+    shared_libs: ["libz"],
+    cflags: pigz_cflags,
+}
+
+cc_library_static {
+    name: "libminipigz_static",
+    srcs: pigz_src_files,
+    host_supported: true,
+    device_supported: true,
+    include_build_directory: true,
+    local_include_dirs: ["zopfli"],
+    shared_libs: ["libz"],
+    cflags: [
+        "-Dmain=pigz_main",
+        "-Wno-unused-variable",
+        "-Wno-unused-parameter",
+    ],
+}
+
+cc_binary {
+    name: "pigz",
+    srcs: pigz_src_files,
+    host_supported: true,
+    device_supported: true,
+    static_libs: ["libzopfli_static"],
+    include_build_directory: true,
+    local_include_dirs: ["zopfli/src/zopfli"],
+    shared_libs: ["libz"],
+    cflags: pigz_cflags,
+}
